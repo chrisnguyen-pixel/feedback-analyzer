@@ -1,0 +1,72 @@
+.sentiment-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.sentiment-display {
+  margin-bottom: 20px;
+}
+
+.sentiment-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.metric {
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.metric.positive {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.metric.neutral {
+  background: rgba(144, 164, 174, 0.1);
+  border: 1px solid rgba(144, 164, 174, 0.3);
+}
+
+.metric.negative {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.metric .label {
+  font-size: 12px;
+  color: #666;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.metric .value {
+  font-size: 20px;
+  font-weight: 600;
+  display: block;
+}
+
+.metric.positive .value {
+  color: #4caf50;
+}
+
+.metric.neutral .value {
+  color: #90a4ae;
+}
+
+.metric.negative .value {
+  color: #f44336;
+}
+
+.sentiment-chart {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .sentiment-metrics {
+    grid-template-columns: 1fr;
+  }
+}

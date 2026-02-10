@@ -1,0 +1,72 @@
+.export-options {
+  position: relative;
+}
+
+.export-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.export-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.export-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  margin-top: 4px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.export-dropdown:hover .export-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.export-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  transition: background 0.2s ease;
+  font-weight: 400;
+}
+
+.export-item:hover {
+  background: #f5f5f5;
+  transform: none;
+}
+
+.export-item:first-child {
+  border-radius: 5px 5px 0 0;
+}
+
+.export-item:last-child {
+  border-radius: 0 0 5px 5px;
+}
+
+@media print {
+  .export-options,
+  .dashboard-header {
+    display: none;
+  }
+}
