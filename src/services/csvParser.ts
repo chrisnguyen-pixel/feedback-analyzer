@@ -48,36 +48,77 @@ export function parseCSV(csvContent: string): ParseResult {
 
     // Transform data - accept any format, use all columns
     const validatedData: FeedbackEntry[] = [];
+    
+    // Find likely columns for feedback and score by scanning data
+    let feedbackCol: string | undefined;
+    let scoreCol: string | undefined;
+    
+    // Heuristic: find the longest text column (likely feedback), and numeric column (likely score)
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+      const row = data[i];
+      for (const col of headers) {
+        const value = row[col];
+        const valueStr = String(value || '').trim();
+        
+        // Look for columns with longer text (feedback columns tend to be longer)
+        if (!feedbackCol && valueStr.length > 20) {
+          feedbackCol = col;
+        }
+        
+        // Look for numeric columns between 0-10 (NPS scores)
+        if (!scoreCol) {
+          const num = Number(value);
+          if (!isNaN(num) && num >= 0 && num <= 10) {
+            scoreCol = col;
+          }
+        }
+      }
+      if (feedbackCol && scoreCol) break;
+    }
+    
+    // If we couldn't find score column, look for any numeric column
+    if (!scoreCol) {
+      for (const col of headers) {
+        const num = Number(data[0][col]);
+        if (!isNaN(num)) {
+          scoreCol = col;
+          break;
+        }
+      }
+    }
+    
+    // If we couldn't find feedback column, use first text column
+    if (!feedbackCol) {
+      feedbackCol = headers.find(h => {
+        const val = data[0][h];
+        return typeof val === 'string' || val === null || val === undefined;
+      });
+    }
+    
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
-      // Start with basic entry - accept any data
+      // Start with basic entry
       const entry: FeedbackEntry = {
         feedback_text: '',
         nps_score: 0,
       };
 
-      // Try to find feedback text in any column
-      const feedbackCol = headers.find(h => 
-        h.includes('feedback') || h.includes('comment') || h.includes('text') || h === 'message'
-      );
+      // Get feedback text from detected column
       if (feedbackCol && row[feedbackCol]) {
         entry.feedback_text = String(row[feedbackCol]).trim();
       }
 
-      // Try to find NPS score in any numeric column
-      const npsCol = headers.find(h => 
-        h.includes('nps') || h.includes('score') || h.includes('rating')
-      );
-      if (npsCol && row[npsCol]) {
-        const score = Number(row[npsCol]);
+      // Get score from detected column
+      if (scoreCol && row[scoreCol]) {
+        const score = Number(row[scoreCol]);
         if (!isNaN(score) && score >= 0 && score <= 10) {
           entry.nps_score = score;
         }
       }
 
-      // Skip if no feedback text or invalid NPS
-      if (!entry.feedback_text && !entry.nps_score) {
+      // Skip if no feedback text
+      if (!entry.feedback_text) {
         continue;
       }
 
