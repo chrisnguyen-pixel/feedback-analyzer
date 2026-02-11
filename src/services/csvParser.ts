@@ -42,50 +42,24 @@ export function parseCSV(csvContent: string): ParseResult {
     const firstRow = data[0];
     const headers = Object.keys(firstRow);
 
-    // Transform data - combine all text columns into feedback
+    // Transform data - return raw with all columns
     const validatedData: FeedbackEntry[] = [];
     
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
-      // Combine all non-empty text values from all columns as feedback
-      const textParts: string[] = [];
-      
-      for (const col of headers) {
-        const value = row[col];
-        const valueStr = String(value || '').trim();
-        
-        // Skip empty values, IDs, emails, and very short values
-        if (!valueStr || valueStr.length < 3) continue;
-        if (valueStr.includes('@') || col.includes('email')) continue; // Skip emails
-        if (valueStr.match(/^[a-z0-9]{20,}$/i)) continue; // Skip hashes/IDs
-        
-        textParts.push(valueStr);
-      }
-      
-      // If no text found, skip this row
-      if (textParts.length === 0) continue;
-      
+      // Store all columns as-is
       const entry: FeedbackEntry = {
-        feedback_text: textParts.join(' | '),
-        nps_score: 0, // No NPS for survey data
+        feedback_text: '',
+        nps_score: 0,
       };
 
-      // Add recognized optional fields if present
-      if (row.age !== undefined && row.age !== null && row.age !== '') {
-        entry.age = String(row.age).trim();
-      }
-      if (row.location !== undefined && row.location !== null && row.location !== '') {
-        entry.location = String(row.location).trim();
-      }
-      if (row.device_type !== undefined && row.device_type !== null && row.device_type !== '') {
-        entry.device_type = String(row.device_type).trim();
-      }
-      if (row.user_segment !== undefined && row.user_segment !== null && row.user_segment !== '') {
-        entry.user_segment = String(row.user_segment).trim();
-      }
-      if (row.date !== undefined && row.date !== null && row.date !== '') {
-        entry.date = String(row.date).trim();
+      // Copy all values from row
+      for (const col of headers) {
+        const value = row[col];
+        if (value !== undefined && value !== null && value !== '') {
+          entry[col] = String(value).trim();
+        }
       }
 
       validatedData.push(entry);

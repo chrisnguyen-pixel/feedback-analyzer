@@ -1,0 +1,148 @@
+.column-selector-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.selector-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.selector-card h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.selector-info {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.columns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.column-item {
+  padding: 16px;
+  background: #f9fafb;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.column-item:hover {
+  background: #f0f7ff;
+  border-color: #0066cc;
+}
+
+.column-item input:checked ~ .checkbox-text {
+  font-weight: 600;
+  color: #0066cc;
+}
+
+.column-item input:checked {
+  accent-color: #0066cc;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.sample-data {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sample-value {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.sample-value:last-child {
+  margin-bottom: 0;
+}
+
+.selector-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.footer-buttons button {
+  flex: 1;
+  max-width: 200px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.action-buttons button {
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .selector-card {
+    padding: 20px;
+  }
+
+  .columns-grid {
+    grid-template-columns: 1fr;
+    max-height: 400px;
+  }
+
+  .footer-buttons {
+    flex-direction: column;
+  }
+
+  .footer-buttons button {
+    max-width: none;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}

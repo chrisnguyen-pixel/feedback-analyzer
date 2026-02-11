@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Header from './components/Header';
 import FileUpload from './components/FileUpload';
 import DataPreview from './components/DataPreview';
+import ColumnSelector from './components/ColumnSelector';
 import AnalysisProgress from './components/AnalysisProgress';
 import Dashboard from './components/Dashboard';
 import AnalysisHistory from './components/AnalysisHistory';
@@ -11,11 +12,12 @@ import { analyzeFeedback } from './services/claudeAnalyzer';
 import { saveAnalysis } from './services/storage';
 import './App.css';
 
-type AppState = 'upload' | 'preview' | 'analyzing' | 'dashboard' | 'history';
+type AppState = 'upload' | 'preview' | 'select-columns' | 'analyzing' | 'dashboard' | 'history';
 
 function App() {
   const [state, setState] = useState<AppState>('upload');
   const [feedbackData, setFeedbackData] = useState<FeedbackEntry[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,24 +29,33 @@ function App() {
     setState('preview');
   };
 
-  const handleAnalyze = async () => {
-    if (feedbackData.length === 0) {
-      setError('No feedback data to analyze');
-      return;
-    }
-
+  const handleSelectColumns = (columns: string[]) => {
+    setSelectedColumns(columns);
     setState('analyzing');
+    handleAnalyzeWithColumns(columns);
+  };
+
+  const handleAnalyzeWithColumns = async (columns: string[]) => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await analyzeFeedback(feedbackData);
+      // Filter feedback data to only selected columns
+      const filteredData = feedbackData.map(entry => ({
+        ...entry,
+        feedback_text: columns
+          .map(col => entry[col])
+          .filter(val => val)
+          .join(' | '),
+      }));
+
+      const result = await analyzeFeedback(filteredData);
       setAnalysisResult(result);
       saveAnalysis(result);
       setState('dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed');
-      setState('preview');
+      setState('select-columns');
     } finally {
       setLoading(false);
     }
@@ -52,6 +63,7 @@ function App() {
 
   const handleNewAnalysis = () => {
     setFeedbackData([]);
+    setSelectedColumns([]);
     setAnalysisResult(null);
     setError(null);
     setState('upload');
@@ -88,9 +100,19 @@ function App() {
         )}
 
         {state === 'preview' && (
-          <DataPreview
-            data={feedbackData}
-            onAnalyze={handleAnalyze}
+          <ColumnSelector
+            columns={feedbackData.length > 0 ? Object.keys(feedbackData[0]) : []}
+            sampleData={feedbackData.slice(0, 3)}
+            onConfirm={handleSelectColumns}
+            onBack={handleNewAnalysis}
+          />
+        )}
+
+        {state === 'select-columns' && (
+          <ColumnSelector
+            columns={feedbackData.length > 0 ? Object.keys(feedbackData[0]) : []}
+            sampleData={feedbackData.slice(0, 3)}
+            onConfirm={handleSelectColumns}
             onBack={handleNewAnalysis}
           />
         )}
