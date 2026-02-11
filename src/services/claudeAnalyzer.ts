@@ -79,23 +79,22 @@ export async function analyzeFeedback(feedbackData: FeedbackEntry[]): Promise<An
 
 async function callClaude(batch: FeedbackEntry[], batchIndex: number, totalBatches: number, apiKey: string): Promise<ClaudeResponse> {
   const feedbackText = batch
-    .map((entry, i) => `[${i + 1}] NPS: ${entry.nps_score} | "${entry.feedback_text}"`)
-    .join('\n');
+    .map((entry, i) => `[${i + 1}] "${entry.feedback_text}"`)
+    .join('\n\n');
 
-  const prompt = `You are a UX analyst. Analyze this batch of user feedback (batch ${batchIndex + 1}/${totalBatches}).
+  const prompt = `You are an expert analyst. Analyze this batch of survey responses (batch ${batchIndex + 1}/${totalBatches}).
 
-FEEDBACK DATA:
+SURVEY RESPONSES:
 ${feedbackText}
 
 Extract the following in valid JSON format:
 
-1. For EACH feedback entry, determine sentiment: "positive", "neutral", or "negative"
-2. Identify themes (Usability Issues, Feature Requests, Onboarding/Learning Curve, Visual/Design, Bugs/Technical, Other)
+1. For EACH response, determine sentiment: "positive", "neutral", or "negative"
+2. Identify key themes, pain points, and topics mentioned
 3. Count each theme and calculate sentiment breakdown per theme
-4. Extract NPS breakdown (count of promoters 9-10, passives 7-8, detractors 0-6)
-5. Calculate overall sentiment distribution
-6. Identify 2-3 best representative quotes per theme
-7. Provide 2-3 key insights
+4. Calculate overall sentiment distribution
+5. Extract 2-3 best representative quotes per theme
+6. Provide 2-3 key insights from the responses
 
 Return ONLY valid JSON (no markdown, no code blocks) with this structure:
 {
@@ -108,7 +107,7 @@ Return ONLY valid JSON (no markdown, no code blocks) with this structure:
       "description": "Brief description"
     }
   ],
-  "nps": { "promoters": number, "passives": number, "detractors": number },
+  "nps": { "promoters": 0, "passives": 0, "detractors": 0 },
   "sentiment": { "positive": number, "neutral": number, "negative": number },
   "insights": ["insight1", "insight2"],
   "feedbackSentiments": [

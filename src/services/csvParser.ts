@@ -9,13 +9,11 @@ export interface ParseResult {
   foundFields: string[];
 }
 
-const RECOGNIZED_FIELDS = ['feedback_text', 'nps_score', 'age', 'location', 'device_type', 'user_segment', 'date'];
-
 export function parseCSV(csvContent: string): ParseResult {
   try {
     const result = Papa.parse(csvContent, {
       header: true,
-      dynamicTyping: false, // Keep as strings to handle any format
+      dynamicTyping: false,
       skipEmptyLines: true,
       transformHeader: (h) => h.trim().toLowerCase().replace(/\s+/g, '_'),
     });
@@ -41,86 +39,37 @@ export function parseCSV(csvContent: string): ParseResult {
       };
     }
 
-    // Get all headers
     const firstRow = data[0];
     const headers = Object.keys(firstRow);
-    const foundFields = headers.filter(h => RECOGNIZED_FIELDS.includes(h));
 
-    // Transform data - accept any format, use all columns
+    // Transform data - combine all text columns into feedback
     const validatedData: FeedbackEntry[] = [];
-    
-    // Find likely columns for feedback and score by scanning data
-    let feedbackCol: string | undefined;
-    let scoreCol: string | undefined;
-    
-    // Heuristic: find the longest text column (likely feedback), and numeric column (likely score)
-    for (let i = 0; i < Math.min(5, data.length); i++) {
-      const row = data[i];
-      for (const col of headers) {
-        const value = row[col];
-        const valueStr = String(value || '').trim();
-        
-        // Look for columns with longer text (feedback columns tend to be longer)
-        if (!feedbackCol && valueStr.length > 20) {
-          feedbackCol = col;
-        }
-        
-        // Look for numeric columns between 0-10 (NPS scores)
-        if (!scoreCol) {
-          const num = Number(value);
-          if (!isNaN(num) && num >= 0 && num <= 10) {
-            scoreCol = col;
-          }
-        }
-      }
-      if (feedbackCol && scoreCol) break;
-    }
-    
-    // If we couldn't find score column, look for any numeric column
-    if (!scoreCol) {
-      for (const col of headers) {
-        const num = Number(data[0][col]);
-        if (!isNaN(num)) {
-          scoreCol = col;
-          break;
-        }
-      }
-    }
-    
-    // If we couldn't find feedback column, use first text column
-    if (!feedbackCol) {
-      feedbackCol = headers.find(h => {
-        const val = data[0][h];
-        return typeof val === 'string' || val === null || val === undefined;
-      });
-    }
     
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
-      // Start with basic entry
+      // Combine all non-empty text values from all columns as feedback
+      const textParts: string[] = [];
+      
+      for (const col of headers) {
+        const value = row[col];
+        const valueStr = String(value || '').trim();
+        
+        // Skip empty values, IDs, emails, and very short values
+        if (!valueStr || valueStr.length < 3) continue;
+        if (valueStr.includes('@') || col.includes('email')) continue; // Skip emails
+        if (valueStr.match(/^[a-z0-9]{20,}$/i)) continue; // Skip hashes/IDs
+        
+        textParts.push(valueStr);
+      }
+      
+      // If no text found, skip this row
+      if (textParts.length === 0) continue;
+      
       const entry: FeedbackEntry = {
-        feedback_text: '',
-        nps_score: 0,
+        feedback_text: textParts.join(' | '),
+        nps_score: 0, // No NPS for survey data
       };
-
-      // Get feedback text from detected column
-      if (feedbackCol && row[feedbackCol]) {
-        entry.feedback_text = String(row[feedbackCol]).trim();
-      }
-
-      // Get score from detected column
-      if (scoreCol && row[scoreCol]) {
-        const score = Number(row[scoreCol]);
-        if (!isNaN(score) && score >= 0 && score <= 10) {
-          entry.nps_score = score;
-        }
-      }
-
-      // Skip if no feedback text
-      if (!entry.feedback_text) {
-        continue;
-      }
 
       // Add recognized optional fields if present
       if (row.age !== undefined && row.age !== null && row.age !== '') {
