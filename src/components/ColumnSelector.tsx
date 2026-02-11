@@ -3,12 +3,11 @@ import './ColumnSelector.css';
 
 interface ColumnSelectorProps {
   columns: string[];
-  sampleData: Record<string, string>[];
   onConfirm: (selectedColumns: string[]) => void;
   onBack: () => void;
 }
 
-export default function ColumnSelector({ columns, sampleData, onConfirm, onBack }: ColumnSelectorProps) {
+export default function ColumnSelector({ columns, onConfirm, onBack }: ColumnSelectorProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const toggleColumn = (col: string) => {
@@ -54,14 +53,6 @@ export default function ColumnSelector({ columns, sampleData, onConfirm, onBack 
                 />
                 <span className="checkbox-text">{col}</span>
               </label>
-              <div className="sample-data">
-                {sampleData.slice(0, 2).map((row, i) => (
-                  <div key={i} className="sample-value">
-                    {String(row[col] || '').substring(0, 80)}
-                    {String(row[col] || '').length > 80 ? '...' : ''}
-                  </div>
-                ))}
-              </div>
             </div>
           ))}
         </div>

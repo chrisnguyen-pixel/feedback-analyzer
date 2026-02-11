@@ -104,7 +104,6 @@ function App() {
         {state === 'preview' && (
           <ColumnSelector
             columns={csvColumns}
-            sampleData={feedbackData.slice(0, 3)}
             onConfirm={handleSelectColumns}
             onBack={handleNewAnalysis}
           />
@@ -113,7 +112,6 @@ function App() {
         {state === 'select-columns' && (
           <ColumnSelector
             columns={csvColumns}
-            sampleData={feedbackData.slice(0, 3)}
             onConfirm={handleSelectColumns}
             onBack={handleNewAnalysis}
           />

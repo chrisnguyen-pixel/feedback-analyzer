@@ -1,8 +1,10 @@
 .file-upload-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
   animation: fadeIn 0.3s ease;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 @keyframes fadeIn {
@@ -19,8 +21,9 @@
 .upload-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 30px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  padding: 32px;
 }
 
 .upload-card h2 {
@@ -38,15 +41,15 @@
 .upload-methods {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 20px;
 }
 
 .method {
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
 }
 
 .method h3 {
@@ -62,17 +65,17 @@
 }
 
 .drop-zone {
-  border: 2px dashed #0066cc;
-  border-radius: 6px;
-  padding: 20px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 24px;
   text-align: center;
-  background: rgba(0, 102, 204, 0.02);
+  background: #fafafa;
   transition: all 0.2s ease;
 }
 
 .drop-zone.drag-over {
-  background: rgba(0, 102, 204, 0.1);
-  border-color: #0052a3;
+  background: #f0f7ff;
+  border-color: #0066cc;
 }
 
 .upload-btn {
