@@ -9,14 +9,13 @@ export interface ParseResult {
   foundFields: string[];
 }
 
-const REQUIRED_FIELDS = ['feedback_text', 'nps_score'];
-const OPTIONAL_FIELDS = ['age', 'location', 'device_type', 'user_segment', 'date'];
+const RECOGNIZED_FIELDS = ['feedback_text', 'nps_score', 'age', 'location', 'device_type', 'user_segment', 'date'];
 
 export function parseCSV(csvContent: string): ParseResult {
   try {
     const result = Papa.parse(csvContent, {
       header: true,
-      dynamicTyping: true,
+      dynamicTyping: false, // Keep as strings to handle any format
       skipEmptyLines: true,
       transformHeader: (h) => h.trim().toLowerCase().replace(/\s+/g, '_'),
     });
@@ -26,7 +25,7 @@ export function parseCSV(csvContent: string): ParseResult {
         success: false,
         data: [],
         error: `CSV parsing error: ${result.errors[0].message}`,
-        requiredFields: REQUIRED_FIELDS,
+        requiredFields: [],
         foundFields: [],
       };
     }
@@ -37,49 +36,52 @@ export function parseCSV(csvContent: string): ParseResult {
         success: false,
         data: [],
         error: 'No data found in CSV',
-        requiredFields: REQUIRED_FIELDS,
+        requiredFields: [],
         foundFields: [],
       };
     }
 
-    // Validate headers
+    // Get all headers
     const firstRow = data[0];
     const headers = Object.keys(firstRow);
-    const foundFields = headers.filter(h => 
-      REQUIRED_FIELDS.includes(h) || OPTIONAL_FIELDS.includes(h)
-    );
+    const foundFields = headers.filter(h => RECOGNIZED_FIELDS.includes(h));
 
-    const missingRequired = REQUIRED_FIELDS.filter(f => !headers.includes(f));
-    if (missingRequired.length > 0) {
-      return {
-        success: false,
-        data: [],
-        error: `Missing required fields: ${missingRequired.join(', ')}`,
-        requiredFields: REQUIRED_FIELDS,
-        foundFields: headers,
-      };
-    }
-
-    // Validate and transform data
+    // Transform data - accept any format, use all columns
     const validatedData: FeedbackEntry[] = [];
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
-      if (!row.feedback_text || String(row.feedback_text).trim() === '') {
-        continue; // Skip empty feedback
-      }
-
-      const npsScore = Number(row.nps_score);
-      if (isNaN(npsScore) || npsScore < 0 || npsScore > 10) {
-        continue; // Skip invalid NPS scores
-      }
-
+      // Start with basic entry - accept any data
       const entry: FeedbackEntry = {
-        feedback_text: String(row.feedback_text).trim(),
-        nps_score: npsScore,
+        feedback_text: '',
+        nps_score: 0,
       };
 
-      // Add optional fields if present
+      // Try to find feedback text in any column
+      const feedbackCol = headers.find(h => 
+        h.includes('feedback') || h.includes('comment') || h.includes('text') || h === 'message'
+      );
+      if (feedbackCol && row[feedbackCol]) {
+        entry.feedback_text = String(row[feedbackCol]).trim();
+      }
+
+      // Try to find NPS score in any numeric column
+      const npsCol = headers.find(h => 
+        h.includes('nps') || h.includes('score') || h.includes('rating')
+      );
+      if (npsCol && row[npsCol]) {
+        const score = Number(row[npsCol]);
+        if (!isNaN(score) && score >= 0 && score <= 10) {
+          entry.nps_score = score;
+        }
+      }
+
+      // Skip if no feedback text or invalid NPS
+      if (!entry.feedback_text && !entry.nps_score) {
+        continue;
+      }
+
+      // Add recognized optional fields if present
       if (row.age !== undefined && row.age !== null && row.age !== '') {
         entry.age = String(row.age).trim();
       }
@@ -103,8 +105,8 @@ export function parseCSV(csvContent: string): ParseResult {
       return {
         success: false,
         data: [],
-        error: 'No valid feedback entries found after validation',
-        requiredFields: REQUIRED_FIELDS,
+        error: 'No valid data found. Make sure your CSV has at least some feedback entries.',
+        requiredFields: [],
         foundFields: headers,
       };
     }
@@ -112,7 +114,7 @@ export function parseCSV(csvContent: string): ParseResult {
     return {
       success: true,
       data: validatedData,
-      requiredFields: REQUIRED_FIELDS,
+      requiredFields: [],
       foundFields: headers,
     };
   } catch (error) {

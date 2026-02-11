@@ -116,9 +116,9 @@ export default function FileUpload({ onFileLoaded }: FileUploadProps) {
               <p className="drop-text">or drag and drop here</p>
             </div>
             <p className="requirements">
-              Required columns: <code>feedback_text</code>, <code>nps_score</code>
+              Supports any CSV format. The app will automatically detect feedback text and scores.
               <br />
-              Optional: <code>age</code>, <code>location</code>, <code>device_type</code>,
+              Optional columns: <code>age</code>, <code>location</code>, <code>device_type</code>,
               <code>user_segment</code>, <code>date</code>
             </p>
           </div>
