@@ -7,6 +7,7 @@ export interface ParseResult {
   error?: string;
   requiredFields: string[];
   foundFields: string[];
+  csvColumns: string[];
 }
 
 export function parseCSV(csvContent: string): ParseResult {
@@ -25,6 +26,7 @@ export function parseCSV(csvContent: string): ParseResult {
         error: `CSV parsing error: ${result.errors[0].message}`,
         requiredFields: [],
         foundFields: [],
+        csvColumns: [],
       };
     }
 
@@ -36,6 +38,7 @@ export function parseCSV(csvContent: string): ParseResult {
         error: 'No data found in CSV',
         requiredFields: [],
         foundFields: [],
+        csvColumns: [],
       };
     }
 
@@ -72,6 +75,7 @@ export function parseCSV(csvContent: string): ParseResult {
         error: 'No valid data found. Make sure your CSV has at least some feedback entries.',
         requiredFields: [],
         foundFields: headers,
+        csvColumns: headers,
       };
     }
 
@@ -80,6 +84,7 @@ export function parseCSV(csvContent: string): ParseResult {
       data: validatedData,
       requiredFields: [],
       foundFields: headers,
+      csvColumns: headers,
     };
   } catch (error) {
     return {

@@ -17,14 +17,16 @@ type AppState = 'upload' | 'preview' | 'select-columns' | 'analyzing' | 'dashboa
 function App() {
   const [state, setState] = useState<AppState>('upload');
   const [feedbackData, setFeedbackData] = useState<FeedbackEntry[]>([]);
+  const [csvColumns, setCsvColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  const handleFileLoaded = (data: FeedbackEntry[]) => {
+  const handleFileLoaded = (data: FeedbackEntry[], columns: string[]) => {
     setFeedbackData(data);
+    setCsvColumns(columns);
     setError(null);
     setState('preview');
   };
@@ -101,7 +103,7 @@ function App() {
 
         {state === 'preview' && (
           <ColumnSelector
-            columns={feedbackData.length > 0 ? Object.keys(feedbackData[0]) : []}
+            columns={csvColumns}
             sampleData={feedbackData.slice(0, 3)}
             onConfirm={handleSelectColumns}
             onBack={handleNewAnalysis}
@@ -110,7 +112,7 @@ function App() {
 
         {state === 'select-columns' && (
           <ColumnSelector
-            columns={feedbackData.length > 0 ? Object.keys(feedbackData[0]) : []}
+            columns={csvColumns}
             sampleData={feedbackData.slice(0, 3)}
             onConfirm={handleSelectColumns}
             onBack={handleNewAnalysis}

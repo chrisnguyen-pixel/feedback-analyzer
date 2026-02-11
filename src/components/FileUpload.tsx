@@ -4,7 +4,7 @@ import { FeedbackEntry } from '../types/feedback';
 import './FileUpload.css';
 
 interface FileUploadProps {
-  onFileLoaded: (data: FeedbackEntry[]) => void;
+  onFileLoaded: (data: FeedbackEntry[], csvColumns: string[]) => void;
 }
 
 export default function FileUpload({ onFileLoaded }: FileUploadProps) {
@@ -26,7 +26,7 @@ export default function FileUpload({ onFileLoaded }: FileUploadProps) {
         return;
       }
 
-      onFileLoaded(result.data);
+      onFileLoaded(result.data, result.csvColumns);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to read file');
     } finally {
@@ -60,7 +60,7 @@ export default function FileUpload({ onFileLoaded }: FileUploadProps) {
         return;
       }
 
-      onFileLoaded(result.data);
+      onFileLoaded(result.data, result.csvColumns);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch Google Sheet');
     } finally {
