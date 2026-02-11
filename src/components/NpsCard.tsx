@@ -7,6 +7,11 @@ interface NpsCardProps {
 }
 
 export default function NpsCard({ result }: NpsCardProps) {
+  // Don't show NPS card if there's no NPS data (survey analysis)
+  if (!result.nps || (result.nps.promoters === 0 && result.nps.passives === 0 && result.nps.detractors === 0)) {
+    return null;
+  }
+
   const data = [
     { name: 'Promoters (9-10)', value: result.nps.promoters },
     { name: 'Passives (7-8)', value: result.nps.passives },

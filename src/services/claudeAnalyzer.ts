@@ -189,9 +189,11 @@ function aggregateResults(results: ClaudeResponse[], feedbackData: FeedbackEntry
     }
 
     // Aggregate NPS
-    totalPromoters += result.nps.promoters;
-    totalPassives += result.nps.passives;
-    totalDetractors += result.nps.detractors;
+    if (result.nps) {
+      totalPromoters += result.nps.promoters || 0;
+      totalPassives += result.nps.passives || 0;
+      totalDetractors += result.nps.detractors || 0;
+    }
 
     // Aggregate sentiment
     totalPositive += result.sentiment.positive;
