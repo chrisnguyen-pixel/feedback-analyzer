@@ -1,8 +1,22 @@
 import { FeedbackEntry, AnalysisResult, Theme, NpsBreakdown, SentimentMetrics, DemographicData, TrendData } from '../types/feedback';
 
-const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
-const API_URL = import.meta.env.VITE_OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/messages';
+const API_URL = 'https://openrouter.ai/api/v1/messages';
 const BATCH_SIZE = 40; // Process 40 entries per API call
+
+// Get API key from environment or localStorage (user can provide it in UI)
+function getApiKey(): string {
+  // Try environment variable first
+  const envKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  if (envKey && !envKey.startsWith('sk-or-v1-')) {
+    // If it looks like a Vercel secret reference, ignore it
+    const stored = localStorage.getItem('openrouter_api_key');
+    if (stored) return stored;
+  }
+  if (envKey) return envKey;
+  
+  // Fall back to localStorage
+  return localStorage.getItem('openrouter_api_key') || '';
+}
 
 interface ClaudeResponse {
   themes: Array<{
@@ -27,8 +41,9 @@ interface ClaudeResponse {
 }
 
 export async function analyzeFeedback(feedbackData: FeedbackEntry[]): Promise<AnalysisResult> {
-  if (!API_KEY) {
-    throw new Error('OpenRouter API key not configured. Set VITE_OPENROUTER_API_KEY in .env');
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('OpenRouter API key not configured. Please add your API key in the settings.');
   }
 
   if (feedbackData.length === 0) {
@@ -50,7 +65,7 @@ export async function analyzeFeedback(feedbackData: FeedbackEntry[]): Promise<An
     const batch = batches[batchIndex];
     console.log(`Processing batch ${batchIndex + 1}/${batches.length}...`);
 
-    const result = await callClaude(batch, batchIndex, batches.length);
+    const result = await callClaude(batch, batchIndex, batches.length, apiKey);
     allResults.push(result);
     feedbackSentiments.push(...result.feedbackSentiments);
   }
@@ -62,7 +77,7 @@ export async function analyzeFeedback(feedbackData: FeedbackEntry[]): Promise<An
   return aggregatedResult;
 }
 
-async function callClaude(batch: FeedbackEntry[], batchIndex: number, totalBatches: number): Promise<ClaudeResponse> {
+async function callClaude(batch: FeedbackEntry[], batchIndex: number, totalBatches: number, apiKey: string): Promise<ClaudeResponse> {
   const feedbackText = batch
     .map((entry, i) => `[${i + 1}] NPS: ${entry.nps_score} | "${entry.feedback_text}"`)
     .join('\n');
@@ -106,7 +121,7 @@ Return ONLY valid JSON (no markdown, no code blocks) with this structure:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: 'claude-3.5-sonnet',

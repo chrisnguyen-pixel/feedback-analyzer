@@ -5,6 +5,7 @@ import DataPreview from './components/DataPreview';
 import AnalysisProgress from './components/AnalysisProgress';
 import Dashboard from './components/Dashboard';
 import AnalysisHistory from './components/AnalysisHistory';
+import ApiKeySettings from './components/ApiKeySettings';
 import { FeedbackEntry, AnalysisResult } from './types/feedback';
 import { analyzeFeedback } from './services/claudeAnalyzer';
 import { saveAnalysis } from './services/storage';
@@ -18,6 +19,7 @@ function App() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleFileLoaded = (data: FeedbackEntry[]) => {
     setFeedbackData(data);
@@ -70,6 +72,7 @@ function App() {
         currentState={state}
         onNewAnalysis={handleNewAnalysis}
         onViewHistory={handleViewHistory}
+        onOpenSettings={() => setShowSettings(true)}
       />
       
       <main className="main-content">
@@ -107,6 +110,10 @@ function App() {
           />
         )}
       </main>
+
+      {showSettings && (
+        <ApiKeySettings onClose={() => setShowSettings(false)} />
+      )}
     </div>
   );
 }
