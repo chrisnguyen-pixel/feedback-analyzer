@@ -9,7 +9,7 @@ interface ColumnSelectorProps {
 }
 
 export default function ColumnSelector({ columns, sampleData, onConfirm, onBack }: ColumnSelectorProps) {
-  const [selected, setSelected] = useState<Set<string>>(new Set(columns));
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const toggleColumn = (col: string) => {
     const newSelected = new Set(selected);
